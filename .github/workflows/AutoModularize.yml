@@ -20,17 +20,28 @@ jobs:
         id: detect_notebook
         run: |
           pip install -r requirements.txt
-          NOTEBOOK=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^notebooks/.*\.ipynb$' | head -n1 || true)
+
+          PREV_SHA=${{ github.event.before }}
+          CURR_SHA=${{ github.sha }}
+
+          echo "🔍 Checking notebook changes between $PREV_SHA → $CURR_SHA"
+
+          if [ "$PREV_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "🆕 First push detected — cannot diff from empty repo. Listing notebooks directly..."
+            NOTEBOOK=$(git ls-files 'notebooks/*.ipynb' | head -n1 || true)
+          else
+            NOTEBOOK=$(git diff --name-only "$PREV_SHA" "$CURR_SHA" | grep '^notebooks/.*\.ipynb$' | head -n1 || true)
+          fi
 
           if [ -z "$NOTEBOOK" ]; then
             echo "❌ No new notebook found in notebooks/ directory. Skipping workflow."
             exit 1
           fi
 
+          echo "📄 Found notebook: $NOTEBOOK"
           echo "NOTEBOOK=$NOTEBOOK" >> $GITHUB_ENV
           echo "BASENAME=$(basename "$NOTEBOOK" .ipynb)" >> $GITHUB_ENV
           echo "REPO_NAME=$(basename $(git rev-parse --show-toplevel))" >> $GITHUB_ENV
-
 
       - name: 🧰 Install dependencies and clone jupylab_cli
         run: |
