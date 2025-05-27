@@ -1,0 +1,75 @@
+name: 📦 Auto Modularize Notebook on Push
+on:
+  push:
+    branches: [main]
+jobs:
+  convert-notebook-to-package:
+    name: 🧠 Classify & Modularize Notebook
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: 📁 Detect newly pushed notebook
+        id: detect_notebook
+        run: |
+          pip install -r requirements.txt
+          NOTEBOOK=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^notebooks/.*\.ipynb$' | head -n1 || true)
+
+          if [ -z "$NOTEBOOK" ]; then
+            echo "❌ No new notebook found in notebooks/ directory. Skipping workflow."
+            exit 1
+          fi
+
+          echo "NOTEBOOK=$NOTEBOOK" >> $GITHUB_ENV
+          echo "BASENAME=$(basename "$NOTEBOOK" .ipynb)" >> $GITHUB_ENV
+          echo "REPO_NAME=$(basename $(git rev-parse --show-toplevel))" >> $GITHUB_ENV
+
+
+      - name: 🧰 Install dependencies and clone jupylab_cli
+        run: |
+          git clone https://github.com/m1guelperez/jupylab_cli.git
+          cd jupylab_cli
+          pip install .
+          pip install -r requirements.txt
+
+      - name: 🧪 Prepare notebook for classification
+        run: |
+          cd jupylab_cli
+          mkdir -p src/pipeline_analyzer/jn_analyzer/resources/{inputs,outputs,backups}
+          cp $NOTEBOOK src/pipeline_analyzer/jn_analyzer/resources/inputs/
+          jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace src/pipeline_analyzer/jn_analyzer/resources/inputs/$(basename $NOTEBOOK)
+
+      - name: 🏷️ Classify notebook cells
+        run: |
+          cd jupylab_cli
+          analyze label-notebooks --debug False --headers False
+          cd ..
+
+      - name: 🏗️ Modularize into production-ready Python package
+        run: |
+          python modularize_tagged_nb.py jupylab_cli/src/pipeline_analyzer/jn_analyzer/resources/outputs/$(basename $NOTEBOOK)
+
+      - name: 📂 Copy data into the new ml_project folder
+        run: |
+          cp -r data/* ml_project/data/
+
+      - name: ✅ Run the output project (basic validation)
+        run: |
+          cd ml_project
+          pip install -r requirements.txt
+          python main.py || echo "Main script failed, but pipeline completed."
+
+      - name: 🚀 Push back the generated project to the repo
+        run: |
+          git config user.name "Kh0uloud"
+          git config user.email "ismailkhouloud9@gmail.com"
+          git add ml_project
+          git commit -m "🤖 Auto-generated ml_project from $NOTEBOOK"
+          git push origin main

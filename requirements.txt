@@ -1,0 +1,8 @@
+nbformat>=5.0.0
+astunparse>=1.6.3
+jupyter
+ipykernel
+notebook
+
+nbconvert
+lxml_html_clean
