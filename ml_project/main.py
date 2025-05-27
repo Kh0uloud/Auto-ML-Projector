@@ -10,18 +10,18 @@ from src.visualize import plot_feature_bars
 from src.features import add_color_brightness_columns
 from src.features import expand_hex_color_columns
 from src.features import normalize_hex_color_columns
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, OneHotEncoder
-import logging
-import lime.lime_tabular
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
-import pandas as pd
-from eli5.sklearn import PermutationImportance
-import matplotlib.pyplot as plt
-from dateutil import parser
-import numpy as np
 import eli5
-import seaborn as sns
+import matplotlib.pyplot as plt
+import logging
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
+import numpy as np
+from dateutil import parser
+import lime.lime_tabular
 import os
+import seaborn as sns
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, OneHotEncoder
+from eli5.sklearn import PermutationImportance
+import pandas as pd
 # Auto-generated pipeline entry point
 
 
