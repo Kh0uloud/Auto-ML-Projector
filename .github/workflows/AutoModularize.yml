@@ -53,7 +53,7 @@ jobs:
 
       - name: 🏗️ Modularize into production-ready Python package
         run: |
-          python modularize_tagged_nb.py jupylab_cli/src/pipeline_analyzer/jn_analyzer/resources/outputs/$(basename $NOTEBOOK)
+          python modularize_tagged_nb.py $(basename $NOTEBOOK)
 
       - name: 📂 Copy data into the new ml_project folder
         run: |
