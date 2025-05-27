@@ -227,15 +227,15 @@ def build_notebook_path(notebook_name: str) -> Path:
     return BASE_DIR / labeled_name
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Modularize a labeled Jupyter notebook by name.")
+    parser = argparse.ArgumentParser(description="Modularize a labeled Jupyter notebook by path.")
     parser.add_argument(
-        "notebook_name",
+        "notebook_path",
         type=str,
-        help="Original notebook name"
+        help="Original notebook path"
     )
     args = parser.parse_args()
 
-    notebook_path = build_notebook_path(args.notebook_name)
+    notebook_path = args.notebook_path
 
     if not notebook_path.exists():
         print(f"❌ Error: Notebook file '{notebook_path}' does not exist.")

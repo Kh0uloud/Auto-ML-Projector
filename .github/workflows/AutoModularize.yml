@@ -41,10 +41,9 @@ jobs:
 
       - name: 🧪 Prepare notebook for classification
         run: |
-          cd jupylab_cli
-          mkdir -p src/pipeline_analyzer/jn_analyzer/resources/{inputs,outputs,backups}
-          cp $NOTEBOOK src/pipeline_analyzer/jn_analyzer/resources/inputs/
-          jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace src/pipeline_analyzer/jn_analyzer/resources/inputs/$(basename $NOTEBOOK)
+          mkdir -p jupylab_cli/src/pipeline_analyzer/jn_analyzer/resources/{inputs,outputs,backups}
+          cp $NOTEBOOK jupylab_cli/src/pipeline_analyzer/jn_analyzer/resources/inputs/
+          jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace jupylab_cli/src/pipeline_analyzer/jn_analyzer/resources/inputs/$(basename $NOTEBOOK)
 
       - name: 🏷️ Classify notebook cells
         run: |
