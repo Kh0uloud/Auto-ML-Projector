@@ -16,25 +16,14 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: 📁 Detect newly pushed notebook
+      - name: 📁 Detect any notebook in notebooks/ directory
         id: detect_notebook
         run: |
           pip install -r requirements.txt
-
-          PREV_SHA=${{ github.event.before }}
-          CURR_SHA=${{ github.sha }}
-
-          echo "🔍 Checking notebook changes between $PREV_SHA → $CURR_SHA"
-
-          if [ "$PREV_SHA" = "0000000000000000000000000000000000000000" ]; then
-            echo "🆕 First push detected — cannot diff from empty repo. Listing notebooks directly..."
-            NOTEBOOK=$(git ls-files 'notebooks/*.ipynb' | head -n1 || true)
-          else
-            NOTEBOOK=$(git diff --name-only "$PREV_SHA" "$CURR_SHA" | grep '^notebooks/.*\.ipynb$' | head -n1 || true)
-          fi
+          NOTEBOOK=$(find notebooks/ -name "*.ipynb" | head -n1 || true)
 
           if [ -z "$NOTEBOOK" ]; then
-            echo "❌ No new notebook found in notebooks/ directory. Skipping workflow."
+            echo "❌ No notebook found in notebooks/ directory. Skipping workflow."
             exit 1
           fi
 
